@@ -31,6 +31,16 @@ export default class Quiz extends Component{
           {text: '2020', id: Date.now() * Math.round(Math.random() * 10000)},
           {text: '2000', id: Date.now() * Math.round(Math.random() * 10000)}
         ]
+      },
+      {
+        question: 'Which framework is cooler?',
+        id: Date.now() * Math.round(Math.random() * 10000),
+        rightAnswerIndex: 0,
+        answers: [
+          {text: 'React', id: Date.now() * Math.round(Math.random() * 10000)},
+          {text: 'Vue', id: Date.now() * Math.round(Math.random() * 10000)},
+          {text: 'Angular', id: Date.now() * Math.round(Math.random() * 10000)}
+        ]
       }
     ]
   };
