@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import classes from 'QuizList';
+import classes from './QuizList.module.css';
 
 class QuizList extends Component {
   static defaultProps = {
