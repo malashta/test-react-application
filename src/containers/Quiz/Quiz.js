@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import ActiveQuiz from '../../components/ActiveQuiz/ActiveQuiz'
 import classes from './Quiz.module.css'
 import FinishedQuiz from "../../components/FinishedQuiz/FinishedQuiz";
+import axios from '../../axios/axios-quiz';
 
 export default class Quiz extends Component{
   state = {
@@ -9,40 +10,8 @@ export default class Quiz extends Component{
     answerState: null,
     isFinished: false,
     results: {},
-    quiz: [
-      {
-        question: 'What color is the sky?',
-        id: Date.now() * Math.round(Math.random() * 10000),
-        rightAnswerIndex: 1,
-        answers: [
-          {text: 'Black', id: Date.now() * Math.round(Math.random() * 10000)},
-          {text: 'Blue', id: Date.now() * Math.round(Math.random() * 10000)},
-          {text: 'Red', id: Date.now() * Math.round(Math.random() * 10000)},
-          {text: 'Green', id: Date.now() * Math.round(Math.random() * 10000)}
-        ]
-      },
-      {
-        question: 'What is the zip code of Sydney?',
-        id: Date.now() * Math.round(Math.random() * 10000),
-        rightAnswerIndex: 3,
-        answers: [
-          {text: '1101', id: Date.now() * Math.round(Math.random() * 10000)},
-          {text: '2626', id: Date.now() * Math.round(Math.random() * 10000)},
-          {text: '2020', id: Date.now() * Math.round(Math.random() * 10000)},
-          {text: '2000', id: Date.now() * Math.round(Math.random() * 10000)}
-        ]
-      },
-      {
-        question: 'Which framework is cooler?',
-        id: Date.now() * Math.round(Math.random() * 10000),
-        rightAnswerIndex: 0,
-        answers: [
-          {text: 'React', id: Date.now() * Math.round(Math.random() * 10000)},
-          {text: 'Vue', id: Date.now() * Math.round(Math.random() * 10000)},
-          {text: 'Angular', id: Date.now() * Math.round(Math.random() * 10000)}
-        ]
-      }
-    ]
+    loading: true,
+    quiz: []
   };
 
   onAnswerClickHandler = answerId => {
@@ -56,12 +25,9 @@ export default class Quiz extends Component{
     const results = this.state.results;
     const questionId = [this.state.quiz[this.state.activeQuestion].id];
 
-    const { rightAnswerIndex } = this.state.quiz[this.state.activeQuestion];
-    const answerIndex = this.state.quiz[this.state.activeQuestion].answers
-      .map(answer => answer.id)
-      .indexOf(answerId);
+    const { rightAnswerId } = this.state.quiz[this.state.activeQuestion];
 
-    if (answerIndex === rightAnswerIndex) {
+    if (answerId === rightAnswerId) {
 
       if (!results[questionId]) {
         results[questionId] = 'success';
@@ -91,8 +57,13 @@ export default class Quiz extends Component{
     }
   };
 
-  componentDidMount() {
-    console.log('Quiz ID: ', this.props.match.params.id)
+  async componentDidMount() {
+    try {
+      const {data: quiz} = await axios.get(`quizes/${this.props.match.params.id}.json`);
+      this.setState({quiz, loading: false})
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   retryHandler = () => {
@@ -113,20 +84,24 @@ export default class Quiz extends Component{
       <div className={classes.Quiz}>
         <div className={classes.QuizWrapper}>
           <h1>Please answer the questions</h1>
-          { this.state.isFinished
-            ? <FinishedQuiz
-              results={this.state.results}
-              quiz={this.state.quiz}
-              onRetry={this.retryHandler}
-            />
-            : <ActiveQuiz
-              answers={this.state.quiz[this.state.activeQuestion].answers}
-              question={this.state.quiz[this.state.activeQuestion].question}
-              quizLength={this.state.quiz.length}
-              answerNumber={this.state.activeQuestion + 1}
-              state={this.state.answerState}
-              onAnswerClick={this.onAnswerClickHandler}
-            />
+
+          {
+            this.state.loading
+              ? null
+              : this.state.isFinished
+              ? <FinishedQuiz
+                results={this.state.results}
+                quiz={this.state.quiz}
+                onRetry={this.retryHandler}
+              />
+              : <ActiveQuiz
+                answers={this.state.quiz[this.state.activeQuestion].answers}
+                question={this.state.quiz[this.state.activeQuestion].question}
+                quizLength={this.state.quiz.length}
+                answerNumber={this.state.activeQuestion + 1}
+                state={this.state.answerState}
+                onAnswerClick={this.onAnswerClickHandler}
+              />
           }
         </div>
       </div>
